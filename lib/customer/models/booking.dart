@@ -1,4 +1,5 @@
 class Booking {
+<<<<<<< HEAD
   final String id;
   final String userEmail;
   final String movieId;
@@ -38,6 +39,12 @@ class Booking {
       timeSlot: map['timeSlot'] ?? '',
     );
   }
+=======
+  final String userEmail;
+  final List<String> seats;
+
+  Booking({required this.userEmail, required this.seats});
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 }
 
 // class Booking {

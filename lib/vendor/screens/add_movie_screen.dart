@@ -16,6 +16,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
   final _timeSlotsController = TextEditingController();
 
   @override
+<<<<<<< HEAD
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
@@ -238,6 +239,60 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                 const SizedBox(height: 20),
               ],
             ),
+=======
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Add Movie")),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: "Title"),
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter title" : null,
+              ),
+              TextFormField(
+                controller: _descController,
+                decoration: const InputDecoration(labelText: "Description"),
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter description" : null,
+              ),
+              TextFormField(
+                controller: _imageController,
+                decoration: const InputDecoration(
+                    labelText: "Image Path (assets/local)"),
+              ),
+              TextFormField(
+                controller: _timeSlotsController,
+                decoration: const InputDecoration(
+                    labelText: "Time Slots (comma separated)"),
+                validator: (value) =>
+                    value == null || value.isEmpty ? "Enter time slots" : null,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                child: const Text("Add Movie"),
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    final movie = Movie(
+                      title: _titleController.text,
+                      description: _descController.text,
+                      imagePath: _imageController.text,
+                      timeSlots: _timeSlotsController.text
+                          .split(",")
+                          .map((e) => e.trim())
+                          .toList(),
+                    );
+                    Navigator.pop(context, movie);
+                  }
+                },
+              ),
+            ],
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
           ),
         ),
       ),

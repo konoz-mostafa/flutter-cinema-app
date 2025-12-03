@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
 import 'screens/login_screen.dart';
@@ -8,6 +9,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+=======
+import 'screens/login_screen.dart';
+
+void main() {
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
   runApp(const CinemaBookingApp());
 }
 
@@ -19,6 +25,7 @@ class CinemaBookingApp extends StatelessWidget {
     return MaterialApp(
       title: 'Cinema Booking',
       debugShowCheckedModeBanner: false,
+<<<<<<< HEAD
       theme: ThemeData(
         primarySwatch: Colors.purple,
         useMaterial3: true,
@@ -58,6 +65,9 @@ class CinemaBookingApp extends StatelessWidget {
           ),
         ),
       ),
+=======
+      theme: ThemeData(primarySwatch: Colors.purple, useMaterial3: true),
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
       home: const LoginScreen(),
     );
   }

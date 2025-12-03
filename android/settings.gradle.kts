@@ -21,8 +21,11 @@ plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
     id("com.android.application") version "8.11.1" apply false
     id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+<<<<<<< HEAD
     // Add the dependency for the Google services Gradle plugin
     id("com.google.gms.google-services") version "4.4.4" apply false
+=======
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 }
 
 include(":app")

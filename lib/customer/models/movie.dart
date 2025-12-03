@@ -2,7 +2,11 @@ class Movie {
   final int id;
   final String title;
   final String description;
+<<<<<<< HEAD
   final String posterUrl;
+=======
+  final String emoji;
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
   final List<String> timeSlots;
   final int totalSeats;
 
@@ -10,6 +14,7 @@ class Movie {
     required this.id,
     required this.title,
     required this.description,
+<<<<<<< HEAD
     required this.posterUrl,
     required this.timeSlots,
     this.totalSeats = 47,
@@ -36,6 +41,12 @@ class Movie {
       totalSeats: map['totalSeats'] ?? 47,
     );
   }
+=======
+    required this.emoji,
+    required this.timeSlots,
+    this.totalSeats = 47,
+  });
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 }
 
 // class Movie {

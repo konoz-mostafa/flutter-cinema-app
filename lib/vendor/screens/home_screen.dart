@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/movie_model.dart';
 import '../services/firebase_service.dart';
+=======
+import '../models/movie_model.dart';
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 import 'add_movie_screen.dart';
 import 'movie_details.dart';
 
@@ -14,6 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Movie> movies = [];
+<<<<<<< HEAD
   Map<String, String> movieDocIds = {}; // Map movie title to document ID
   bool _loading = true;
 
@@ -41,11 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+=======
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+<<<<<<< HEAD
         title: const Text("Vendor App (Firebase)"),
         actions: [
           IconButton(
@@ -67,6 +75,54 @@ class _HomeScreenState extends State<HomeScreen> {
                     return _buildMovieCard(movie, index);
                   },
                 ),
+=======
+        title: const Text("Vendor App (Local)"),
+      ),
+      body: movies.isEmpty
+          ? const Center(child: Text("No movies added yet"))
+          : ListView.builder(
+              itemCount: movies.length,
+              itemBuilder: (context, index) {
+                final movie = movies[index];
+                return ListTile(
+                  leading: movie.imagePath.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            movie.imagePath,
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Container(
+                          width: 70,
+                          height: 70,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.movie),
+                        ),
+                  title: Text(movie.title),
+                  subtitle: Text(movie.description),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MovieDetailsScreen(movie: movie),
+                      ),
+                    );
+                  },
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      setState(() {
+                        movies.removeAt(index);
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
@@ -75,6 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
             MaterialPageRoute(builder: (_) => const AddMovieScreen()),
           );
           if (newMovie != null) {
+<<<<<<< HEAD
             try {
               // Save to Firebase
               await FirebaseService.addMovie(newMovie);
@@ -98,11 +155,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }
             }
+=======
+            setState(() {
+              movies.add(newMovie);
+            });
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
           }
         },
       ),
     );
   }
+<<<<<<< HEAD
 
   Widget _buildMovieCard(Movie movie, int index) {
     return Container(
@@ -344,4 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+=======
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 }

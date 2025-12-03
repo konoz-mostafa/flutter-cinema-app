@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
 import 'screens/home_screen.dart';
@@ -13,6 +14,12 @@ void main() async {
   } catch (e) {
     runApp(ErrorApp(error: e.toString()));
   }
+=======
+import 'screens/home_screen.dart';
+
+void main() {
+  runApp(const VendorApp());
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 }
 
 class VendorApp extends StatelessWidget {
@@ -22,6 +29,7 @@ class VendorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+<<<<<<< HEAD
       title: "Cinema Vendor Dashboard",
       theme: ThemeData(
         primarySwatch: Colors.indigo,
@@ -86,11 +94,17 @@ class VendorApp extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 8,
         ),
+=======
+      title: "Vendor App Local",
+      theme: ThemeData(
+        primarySwatch: Colors.indigo,
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
       ),
       home: const HomeScreen(),
     );
   }
 }
+<<<<<<< HEAD
 
 class ErrorApp extends StatelessWidget {
   final String error;
@@ -107,3 +121,5 @@ class ErrorApp extends StatelessWidget {
     );
   }
 }
+=======
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe

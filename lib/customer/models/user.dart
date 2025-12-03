@@ -1,4 +1,5 @@
 class User {
+<<<<<<< HEAD
   final String id;
   final String fullName;
   final String email;
@@ -24,6 +25,13 @@ class User {
       email: map['email'] ?? '',
     );
   }
+=======
+  final String email;
+  final String password;
+  final String name;
+
+  User({required this.email, required this.password, required this.name});
+>>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 }
 
 // class User {
