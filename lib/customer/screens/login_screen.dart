@@ -128,16 +128,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
+        child: Center(
+          child: SingleChildScrollView(
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Card(
                     elevation: 20,
                     shadowColor: Colors.black.withOpacity(0.3),
-                    shape: RoundedRectangleBorder(
+                shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Container(
@@ -151,12 +151,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             Colors.grey.shade50,
                           ],
                         ),
-                      ),
-                      child: Padding(
+                ),
+                child: Padding(
                         padding: const EdgeInsets.all(40.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
@@ -169,16 +169,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                             ),
                             const SizedBox(height: 24),
-                            Text(
-                              'Cinema Booking',
+                      Text(
+                        'Cinema Booking',
                               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.purple.shade900,
                                     letterSpacing: 1.2,
                                   ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
                               _isRegister ? 'Create Your Account' : 'Welcome Back!',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     color: Colors.grey.shade600,
@@ -195,23 +195,23 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                             if (_isRegister) const SizedBox(height: 20),
                             _buildModernTextField(
-                              controller: _emailController,
+                        controller: _emailController,
                               label: 'Email',
                               icon: Icons.email_outlined,
-                              keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.emailAddress,
                               isFirst: !_isRegister,
-                            ),
+                      ),
                             const SizedBox(height: 20),
                             _buildModernTextField(
-                              controller: _passwordController,
+                        controller: _passwordController,
                               label: 'Password',
                               icon: Icons.lock_outline,
                               isPassword: true,
                             ),
                             if (_isRegister) const SizedBox(height: 20),
-                            if (_isRegister)
+                      if (_isRegister)
                               _buildModernTextField(
-                                controller: _confirmPasswordController,
+                          controller: _confirmPasswordController,
                                 label: 'Confirm Password',
                                 icon: Icons.lock_outline,
                                 isPassword: true,
@@ -236,12 +236,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   ),
                                 ],
                               ),
-                              child: ElevatedButton(
+                        child: ElevatedButton(
                                 onPressed: _loading ? null : _handleAuth,
-                                style: ElevatedButton.styleFrom(
+                          style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
+                            shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
@@ -256,21 +256,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                       )
                                     : Text(
                                         _isRegister ? 'Create Account' : 'Sign In',
-                                        style: const TextStyle(
+                            style: const TextStyle(
                                           fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                                           letterSpacing: 1.2,
-                                        ),
-                                      ),
-                              ),
                             ),
+                          ),
+                        ),
+                      ),
                             const SizedBox(height: 20),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isRegister = !_isRegister;
-                                });
-                              },
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isRegister = !_isRegister;
+                          });
+                        },
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
