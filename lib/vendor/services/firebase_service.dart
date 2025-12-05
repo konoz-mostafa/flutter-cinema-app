@@ -49,6 +49,24 @@ class FirebaseService {
     }
   }
 
+  // Update movie by document ID
+  static Future<void> updateMovieById(String docId, Movie movie) async {
+    try {
+      await _db.collection('movies').doc(docId).update({
+        'title': movie.title,
+        'description': movie.description,
+        'posterUrl': movie.imagePath,
+        'timeSlots': movie.timeSlots,
+        'totalSeats': movie.totalSeats,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      print('Movie updated in Firebase: ${movie.title}');
+    } catch (e) {
+      print('Error updating movie in Firebase: $e');
+      rethrow;
+    }
+  }
+
   // Delete movie by document ID
   static Future<void> deleteMovieById(String docId) async {
     try {

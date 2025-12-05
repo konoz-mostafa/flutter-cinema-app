@@ -10,7 +10,6 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-<<<<<<< HEAD
 class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -45,15 +44,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   }
 
   void _handleAuth() async {
-=======
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  bool _isRegister = false;
-
-  void _handleAuth() {
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -62,16 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-<<<<<<< HEAD
     setState(() => _loading = true);
 
-=======
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
     if (_isRegister) {
       final confirmPassword = _confirmPasswordController.text.trim();
       if (password != confirmPassword) {
         _showMessage('Passwords do not match!');
-<<<<<<< HEAD
         setState(() => _loading = false);
         return;
       }
@@ -84,17 +70,10 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _loading = false);
 
       if (newUser == null) {
-=======
-        return;
-      }
-
-      if (AppState.users.any((u) => u.email == email)) {
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
         _showMessage('User already exists!');
         return;
       }
 
-<<<<<<< HEAD
       _navigateToHome(newUser);
     } else {
       final user = await AppState.loginUser(email, password);
@@ -104,25 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
         _showMessage('Invalid credentials!');
         return;
       }
-
-=======
-      final newUser = User(
-        email: email,
-        password: password,
-        name: email.split('@')[0],
-      );
-      AppState.users.add(newUser);
-      _navigateToHome(newUser);
-    } else {
-      final user = AppState.users.firstWhere(
-        (u) => u.email == email && u.password == password,
-        orElse: () => User(email: '', password: '', name: ''),
-      );
-      if (user.email.isEmpty) {
+      setState(() => _loading = false);
+      if (user == null) {
         _showMessage('Invalid credentials!');
         return;
       }
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
       _navigateToHome(user);
     }
   }
@@ -130,21 +95,16 @@ class _LoginScreenState extends State<LoginScreen> {
   void _navigateToHome(User user) {
     Navigator.pushReplacement(
       context,
-<<<<<<< HEAD
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => HomeScreen(user: user),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },
       ),
-=======
-      MaterialPageRoute(builder: (context) => HomeScreen(user: user)),
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
     );
   }
 
   void _showMessage(String message) {
-<<<<<<< HEAD
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -153,11 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
         margin: const EdgeInsets.all(16),
       ),
     );
-=======
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
   }
 
   @override
@@ -168,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-<<<<<<< HEAD
             colors: [
               Colors.purple.shade800,
               Colors.indigo.shade900,
@@ -178,16 +132,16 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         child: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
+          child: Center(
+            child: SingleChildScrollView(
               child: FadeTransition(
                 opacity: _fadeAnimation,
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Card(
                     elevation: 20,
                     shadowColor: Colors.black.withOpacity(0.3),
-                shape: RoundedRectangleBorder(
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Container(
@@ -201,12 +155,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             Colors.grey.shade50,
                           ],
                         ),
-                ),
-                child: Padding(
+                      ),
+                      child: Padding(
                         padding: const EdgeInsets.all(40.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                             Container(
                               padding: const EdgeInsets.all(20),
                               decoration: BoxDecoration(
@@ -219,16 +173,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 24),
-                      Text(
-                        'Cinema Booking',
+                            Text(
+                              'Cinema Booking',
                               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.purple.shade900,
                                     letterSpacing: 1.2,
                                   ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
                               _isRegister ? 'Create Your Account' : 'Welcome Back!',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     color: Colors.grey.shade600,
@@ -245,23 +199,23 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             if (_isRegister) const SizedBox(height: 20),
                             _buildModernTextField(
-                        controller: _emailController,
+                              controller: _emailController,
                               label: 'Email',
                               icon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
+                              keyboardType: TextInputType.emailAddress,
                               isFirst: !_isRegister,
-                      ),
+                            ),
                             const SizedBox(height: 20),
                             _buildModernTextField(
-                        controller: _passwordController,
+                              controller: _passwordController,
                               label: 'Password',
                               icon: Icons.lock_outline,
                               isPassword: true,
                             ),
                             if (_isRegister) const SizedBox(height: 20),
-                      if (_isRegister)
+                            if (_isRegister)
                               _buildModernTextField(
-                          controller: _confirmPasswordController,
+                                controller: _confirmPasswordController,
                                 label: 'Confirm Password',
                                 icon: Icons.lock_outline,
                                 isPassword: true,
@@ -286,12 +240,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ],
                               ),
-                        child: ElevatedButton(
+                              child: ElevatedButton(
                                 onPressed: _loading ? null : _handleAuth,
-                          style: ElevatedButton.styleFrom(
+                                style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.transparent,
                                   shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
+                                  shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                 ),
@@ -306,108 +260,21 @@ class _LoginScreenState extends State<LoginScreen> {
                                       )
                                     : Text(
                                         _isRegister ? 'Create Account' : 'Sign In',
-                            style: const TextStyle(
+                                        style: const TextStyle(
                                           fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                                          fontWeight: FontWeight.bold,
                                           letterSpacing: 1.2,
-=======
-            colors: [Colors.purple.shade900, Colors.blue.shade900],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text('🎬', style: TextStyle(fontSize: 64)),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Cinema Booking',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _isRegister ? 'Create Account' : 'Welcome Back',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 32),
-                      TextField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.email),
-                        ),
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.lock),
-                        ),
-                        obscureText: true,
-                      ),
-                      if (_isRegister) const SizedBox(height: 16),
-                      if (_isRegister)
-                        TextField(
-                          controller: _confirmPasswordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Confirm Password',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.lock_outline),
-                          ),
-                          obscureText: true,
-                        ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: _handleAuth,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            _isRegister ? 'Register' : 'Login',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
-                            ),
-                          ),
-                        ),
-                      ),
-<<<<<<< HEAD
                             const SizedBox(height: 20),
-=======
-                      const SizedBox(height: 16),
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _isRegister = !_isRegister;
-                          });
-                        },
-<<<<<<< HEAD
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isRegister = !_isRegister;
+                                });
+                              },
                               style: TextButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -441,35 +308,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-=======
-                        child: Text(
-                          _isRegister
-                              ? 'Already have an account? Login'
-                              : "Don't have an account? Register",
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Demo Accounts:',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 8),
-                            Text('user1@example.com / password123'),
-                            Text('user2@example.com / password123'),
-                          ],
-                        ),
-                      ),
-                    ],
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                   ),
                 ),
               ),
@@ -480,7 +318,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-<<<<<<< HEAD
   Widget _buildModernTextField({
     required TextEditingController controller,
     required String label,
@@ -530,15 +367,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-}
-=======
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
   }
 }
 
@@ -773,4 +601,3 @@ class _LoginScreenState extends State<LoginScreen> {
 //     super.dispose();
 //   }
 // }
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe

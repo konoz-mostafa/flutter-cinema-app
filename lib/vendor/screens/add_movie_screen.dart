@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/movie_model.dart';
 
 class AddMovieScreen extends StatefulWidget {
-  const AddMovieScreen({super.key});
+  final Movie? movieToEdit; // If provided, we're in edit mode
+
+  const AddMovieScreen({super.key, this.movieToEdit});
 
   @override
   State<AddMovieScreen> createState() => _AddMovieScreenState();
@@ -13,16 +15,45 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
   final _imageController = TextEditingController();
-  final _timeSlotsController = TextEditingController();
+  final _timeSlotController = TextEditingController();
+  List<String> _timeSlots = [];
+  bool get isEditMode => widget.movieToEdit != null;
 
   @override
-<<<<<<< HEAD
+  void initState() {
+    super.initState();
+    // If editing, pre-fill the fields
+    if (isEditMode) {
+      _titleController.text = widget.movieToEdit!.title;
+      _descController.text = widget.movieToEdit!.description;
+      _imageController.text = widget.movieToEdit!.imagePath;
+      _timeSlots = List<String>.from(widget.movieToEdit!.timeSlots);
+    }
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
     _imageController.dispose();
-    _timeSlotsController.dispose();
+    _timeSlotController.dispose();
     super.dispose();
+  }
+
+  void _addTimeSlot() {
+    final timeSlot = _timeSlotController.text.trim();
+    if (timeSlot.isNotEmpty && !_timeSlots.contains(timeSlot)) {
+      setState(() {
+        _timeSlots.add(timeSlot);
+        _timeSlotController.clear();
+      });
+    }
+  }
+
+  void _removeTimeSlot(int index) {
+    setState(() {
+      _timeSlots.removeAt(index);
+    });
   }
 
   @override
@@ -44,7 +75,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
             ),
           ),
         ),
-        title: const Text('Add New Movie'),
+        title: Text(isEditMode ? 'Edit Movie' : 'Add New Movie'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -94,9 +125,9 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Create New Movie',
-                        style: TextStyle(
+                      Text(
+                        isEditMode ? 'Edit Movie Details' : 'Create New Movie',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -104,7 +135,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Fill in the details below',
+                        isEditMode ? 'Update the details below' : 'Fill in the details below',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 14,
@@ -160,21 +191,165 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
-                // Time Slots Field
-                TextFormField(
-                  controller: _timeSlotsController,
-                  decoration: InputDecoration(
-                    labelText: 'Time Slots',
-                    hintText: '10:00 AM, 2:00 PM, 6:00 PM, 10:00 PM',
-                    prefixIcon: Icon(Icons.schedule, color: Colors.indigo.shade700),
-                    filled: true,
-                    fillColor: Colors.white,
-                    helperText: 'Separate multiple times with commas',
-                    helperStyle: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                // Time Slots Section
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Please enter at least one time slot" : null,
-                  style: const TextStyle(fontSize: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.schedule, color: Colors.indigo.shade700, size: 20),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Time Slots',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Time Slot Input and Add Button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _timeSlotController,
+                  decoration: InputDecoration(
+                                hintText: 'e.g., 10:00 AM',
+                                prefixIcon: Icon(Icons.access_time, color: Colors.indigo.shade700),
+                    filled: true,
+                                fillColor: Colors.grey.shade50,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.indigo.shade700, width: 2),
+                                ),
+                              ),
+                              style: const TextStyle(fontSize: 16),
+                              onFieldSubmitted: (_) => _addTimeSlot(),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.indigo.shade600,
+                                  Colors.purple.shade600,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.indigo.withOpacity(0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              onPressed: _addTimeSlot,
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              tooltip: 'Add Time Slot',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Display Added Time Slots
+                      if (_timeSlots.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            'No time slots added yet. Add at least one time slot.',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        )
+                      else
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: List.generate(_timeSlots.length, (index) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.indigo.shade600,
+                                    Colors.purple.shade600,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.indigo.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.schedule, color: Colors.white, size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    _timeSlots[index],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () => _removeTimeSlot(index),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 30),
                 // Submit Button
@@ -198,15 +373,22 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        if (_timeSlots.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please add at least one time slot'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
                         final movie = Movie(
                           title: _titleController.text.trim(),
                           description: _descController.text.trim(),
                           imagePath: _imageController.text.trim(),
-                          timeSlots: _timeSlotsController.text
-                              .split(",")
-                              .map((e) => e.trim())
-                              .where((e) => e.isNotEmpty)
-                              .toList(),
+                          timeSlots: _timeSlots,
+                          totalSeats: isEditMode ? widget.movieToEdit!.totalSeats : 47,
+                          bookedSeats: isEditMode ? widget.movieToEdit!.bookedSeats : [],
                         );
                         Navigator.pop(context, movie);
                       }
@@ -219,14 +401,14 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add_circle_outline, size: 24),
-                        SizedBox(width: 8),
+                        Icon(isEditMode ? Icons.save : Icons.add_circle_outline, size: 24),
+                        const SizedBox(width: 8),
                         Text(
-                          'Add Movie',
-                          style: TextStyle(
+                          isEditMode ? 'Update Movie' : 'Add Movie',
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -239,60 +421,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                 const SizedBox(height: 20),
               ],
             ),
-=======
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Add Movie")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: "Title"),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter title" : null,
-              ),
-              TextFormField(
-                controller: _descController,
-                decoration: const InputDecoration(labelText: "Description"),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter description" : null,
-              ),
-              TextFormField(
-                controller: _imageController,
-                decoration: const InputDecoration(
-                    labelText: "Image Path (assets/local)"),
-              ),
-              TextFormField(
-                controller: _timeSlotsController,
-                decoration: const InputDecoration(
-                    labelText: "Time Slots (comma separated)"),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter time slots" : null,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                child: const Text("Add Movie"),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    final movie = Movie(
-                      title: _titleController.text,
-                      description: _descController.text,
-                      imagePath: _imageController.text,
-                      timeSlots: _timeSlotsController.text
-                          .split(",")
-                          .map((e) => e.trim())
-                          .toList(),
-                    );
-                    Navigator.pop(context, movie);
-                  }
-                },
-              ),
-            ],
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
           ),
         ),
       ),

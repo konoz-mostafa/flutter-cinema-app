@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:cached_network_image/cached_network_image.dart';
-=======
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 import '../models/user.dart';
 import '../models/movie.dart';
 import 'seat_selection_screen.dart';
@@ -12,11 +9,7 @@ class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
 
   const MovieDetailsScreen({Key? key, required this.user, required this.movie})
-<<<<<<< HEAD
       : super(key: key);
-=======
-    : super(key: key);
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
 
   @override
   State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
@@ -28,7 +21,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
       body: CustomScrollView(
         slivers: [
           // Modern App Bar with Image
@@ -200,78 +192,25 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-=======
-      appBar: AppBar(
-        title: Text(widget.movie.title),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.purple.shade400, Colors.blue.shade400],
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  widget.movie.emoji,
-                  style: const TextStyle(fontSize: 100),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.movie.description,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Select Time Slot',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                   Wrap(
                     spacing: 12,
                     runSpacing: 12,
                     children: widget.movie.timeSlots.map((slot) {
                       final isSelected = _selectedTimeSlot == slot;
-<<<<<<< HEAD
                       return GestureDetector(
-=======
-                      return InkWell(
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                         onTap: () {
                           setState(() {
                             _selectedTimeSlot = slot;
                           });
                         },
-<<<<<<< HEAD
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24,
-=======
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                             vertical: 16,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-<<<<<<< HEAD
                                 ? Colors.purple.shade600
                                 : Colors.white,
                             border: Border.all(
@@ -296,49 +235,24 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                       offset: const Offset(0, 2),
                                     ),
                                   ],
-=======
-                                ? Colors.purple.shade50
-                                : Colors.white,
-                            border: Border.all(
-                              color: isSelected
-                                  ? Colors.purple
-                                  : Colors.grey.shade300,
-                              width: 2,
-                            ),
-                            borderRadius: BorderRadius.circular(10),
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-<<<<<<< HEAD
                                 Icons.schedule_rounded,
                                 color: isSelected ? Colors.white : Colors.purple.shade600,
                                 size: 20,
-=======
-                                Icons.access_time,
-                                color: isSelected ? Colors.purple : Colors.grey,
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                               ),
                               const SizedBox(width: 8),
                               Text(
                                 slot,
                                 style: TextStyle(
-<<<<<<< HEAD
                                   color: isSelected ? Colors.white : Colors.grey.shade800,
                                   fontWeight: isSelected
                                       ? FontWeight.bold
                                       : FontWeight.w600,
                                   fontSize: 15,
-=======
-                                  color: isSelected
-                                      ? Colors.purple
-                                      : Colors.black,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                                 ),
                               ),
                             ],
@@ -348,7 +262,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     }).toList(),
                   ),
                   if (_selectedTimeSlot != null) ...[
-<<<<<<< HEAD
                     const SizedBox(height: 32),
                     Container(
                       width: double.infinity,
@@ -369,29 +282,17 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           ),
                         ],
                       ),
-=======
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-<<<<<<< HEAD
                             PageRouteBuilder(
                               pageBuilder: (context, animation, secondaryAnimation) =>
                                   SeatSelectionScreen(
-=======
-                            MaterialPageRoute(
-                              builder: (context) => SeatSelectionScreen(
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                                 user: widget.user,
                                 movie: widget.movie,
                                 timeSlot: _selectedTimeSlot!,
                               ),
-<<<<<<< HEAD
                               transitionsBuilder: (context, animation, secondaryAnimation, child) {
                                 return SlideTransition(
                                   position: Tween<Offset>(
@@ -401,13 +302,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                   child: child,
                                 );
                               },
-=======
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-<<<<<<< HEAD
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
@@ -428,46 +326,20 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             SizedBox(width: 8),
                             Icon(Icons.arrow_forward_rounded, size: 20),
                           ],
-=======
-                          backgroundColor: Colors.purple,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: const Text(
-                          'Continue to Seat Selection',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
                         ),
                       ),
                     ),
                   ],
-<<<<<<< HEAD
                   const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
         ],
-=======
-                ],
-              ),
-            ),
-          ],
-        ),
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
       ),
     );
   }
 }
-<<<<<<< HEAD
-=======
-
-// import 'package:flutter/material.dart';
 // import '../models/user.dart';
 // import '../models/movie.dart';
 // import 'seat_selection_screen.dart';
@@ -621,4 +493,3 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 //     );
 //   }
 // }
->>>>>>> f099a548568129d8536f635149133ad46a1f80fe
