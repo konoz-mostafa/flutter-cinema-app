@@ -42,28 +42,28 @@ class _HomeScreenState extends State<HomeScreen> {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .listen((snapshot) {
-      setState(() {
-        _unreadNotifications = snapshot.docs.length;
-      });
+          setState(() {
+            _unreadNotifications = snapshot.docs.length;
+          });
 
-      // Show notification for new bookings (only show newly added ones)
-      if (snapshot.docChanges.isNotEmpty) {
-        for (var change in snapshot.docChanges) {
-          if (change.type == DocumentChangeType.added && 
-              change.doc.exists && 
-              !_shownNotificationIds.contains(change.doc.id)) {
-            final notification = {
-              'id': change.doc.id,
-              ...change.doc.data() as Map<String, dynamic>,
-            };
-            _shownNotificationIds.add(change.doc.id);
-            if (mounted) {
-              _showBookingNotification(notification);
+          // Show notification for new bookings (only show newly added ones)
+          if (snapshot.docChanges.isNotEmpty) {
+            for (var change in snapshot.docChanges) {
+              if (change.type == DocumentChangeType.added &&
+                  change.doc.exists &&
+                  !_shownNotificationIds.contains(change.doc.id)) {
+                final notification = {
+                  'id': change.doc.id,
+                  ...change.doc.data() as Map<String, dynamic>,
+                };
+                _shownNotificationIds.add(change.doc.id);
+                if (mounted) {
+                  _showBookingNotification(notification);
+                }
+              }
             }
           }
-        }
-      }
-    });
+        });
   }
 
   void _showBookingNotification(Map<String, dynamic> notification) {
@@ -80,10 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     notification['title'] ?? 'New Booking',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   Text(
                     notification['message'] ?? '',
@@ -97,9 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.green,
         duration: Duration(seconds: 5),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: EdgeInsets.all(16),
         action: SnackBarAction(
           label: 'View',
@@ -112,7 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> _markNotificationAsRead(Map<String, dynamic> notification) async {
+  Future<void> _markNotificationAsRead(
+    Map<String, dynamic> notification,
+  ) async {
     try {
       final notificationId = notification['id'] ?? '';
       if (notificationId.isNotEmpty) {
@@ -132,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .collection('notifications')
           .where('read', isEqualTo: false)
           .get();
-      
+
       final batch = FirebaseFirestore.instance.batch();
       for (var doc in snapshot.docs) {
         batch.update(doc.reference, {'read': true});
@@ -153,10 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final notifications = snapshot.docs.map((doc) {
         final data = doc.data();
-        return {
-          'id': doc.id,
-          ...data,
-        };
+        return {'id': doc.id, ...data};
       }).toList();
 
       if (!mounted) return;
@@ -193,7 +187,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.notifications_off, size: 48, color: Colors.grey),
+                          Icon(
+                            Icons.notifications_off,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
                           SizedBox(height: 16),
                           Text(
                             'No notifications',
@@ -213,10 +211,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         margin: EdgeInsets.only(bottom: 12),
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isRead ? Colors.grey.shade100 : Colors.blue.shade50,
+                          color: isRead
+                              ? Colors.grey.shade100
+                              : Colors.blue.shade50,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isRead ? Colors.grey.shade300 : Colors.blue.shade200,
+                            color: isRead
+                                ? Colors.grey.shade300
+                                : Colors.blue.shade200,
                             width: isRead ? 1 : 2,
                           ),
                         ),
@@ -306,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         return 'Just now';
       }
-      
+
       final now = DateTime.now();
       final difference = now.difference(dateTime);
 
@@ -347,9 +349,34 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Vendor App (Firebase)"),
+        elevation: 1,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFFE0BBE4), // موف فاتح
+                Color(0xFF957DAD), // أزرق فاتح / بنفسجي
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: const Align(
+          alignment: Alignment.centerLeft, // كلمة Vendor تبدا من الشمال
+          child: Text(
+            "Vendor App",
+            style: TextStyle(
+              color: Color.fromARGB(255, 235, 234, 234), // النص أبيض
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+        ),
+        iconTheme: const IconThemeData(
+          color: Color.fromARGB(255, 235, 234, 234), // أيقونات أبيض
+        ),
         actions: [
-          // Notifications button with badge
           Stack(
             children: [
               IconButton(
@@ -363,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   top: 8,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.red,
                       shape: BoxShape.circle,
                     ),
@@ -391,18 +418,19 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : movies.isEmpty
-              ? const Center(child: Text("No movies added yet"))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: movies.length,
-                  itemBuilder: (context, index) {
-                    final movie = movies[index];
-                    return _buildMovieCard(movie, index);
-                  },
-                ),
+          ? const Center(child: Text("No movies added yet"))
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: movies.length,
+              itemBuilder: (context, index) {
+                final movie = movies[index];
+                return _buildMovieCard(movie, index);
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
@@ -568,34 +596,52 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               child: IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                                 onPressed: () async {
                                   final docId = movieDocIds[movie.title];
                                   if (docId != null) {
-                                    final updatedMovie = await Navigator.push<Movie?>(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => AddMovieScreen(movieToEdit: movie),
-                                      ),
-                                    );
+                                    final updatedMovie =
+                                        await Navigator.push<Movie?>(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => AddMovieScreen(
+                                              movieToEdit: movie,
+                                            ),
+                                          ),
+                                        );
                                     if (updatedMovie != null) {
                                       try {
-                                        await FirebaseService.updateMovieById(docId, updatedMovie);
+                                        await FirebaseService.updateMovieById(
+                                          docId,
+                                          updatedMovie,
+                                        );
                                         // Reload movies to update the mapping (in case title changed)
                                         await _loadMovies();
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text('Movie updated successfully!'),
+                                              content: Text(
+                                                'Movie updated successfully!',
+                                              ),
                                               backgroundColor: Colors.green,
                                             ),
                                           );
                                         }
                                       } catch (e) {
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             SnackBar(
-                                              content: Text('Error updating movie: $e'),
+                                              content: Text(
+                                                'Error updating movie: $e',
+                                              ),
                                               backgroundColor: Colors.red,
                                             ),
                                           );
@@ -621,37 +667,54 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                               child: IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.white, size: 20),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                                 onPressed: () async {
                                   // Show confirmation dialog
                                   final confirmed = await showDialog<bool>(
                                     context: context,
                                     builder: (context) => AlertDialog(
                                       title: const Text('Delete Movie'),
-                                      content: Text('Are you sure you want to delete "${movie.title}"?'),
+                                      content: Text(
+                                        'Are you sure you want to delete "${movie.title}"?',
+                                      ),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.pop(context, false),
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
                                           child: const Text('Cancel'),
                                         ),
                                         TextButton(
-                                          onPressed: () => Navigator.pop(context, true),
-                                          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text(
+                                            'Delete',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
                                         ),
                                       ],
                                     ),
                                   );
-                                  
+
                                   if (confirmed == true) {
                                     try {
                                       final docId = movieDocIds[movie.title];
                                       if (docId != null) {
-                                        await FirebaseService.deleteMovieById(docId);
+                                        await FirebaseService.deleteMovieById(
+                                          docId,
+                                        );
                                         await _loadMovies();
                                         if (mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text('Movie deleted successfully!'),
+                                              content: Text(
+                                                'Movie deleted successfully!',
+                                              ),
                                               backgroundColor: Colors.green,
                                             ),
                                           );
@@ -659,9 +722,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
                                           SnackBar(
-                                            content: Text('Error deleting movie: $e'),
+                                            content: Text(
+                                              'Error deleting movie: $e',
+                                            ),
                                             backgroundColor: Colors.red,
                                           ),
                                         );
@@ -708,7 +775,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          Icon(Icons.access_time, size: 16, color: Colors.indigo.shade700),
+                          Icon(
+                            Icons.access_time,
+                            size: 16,
+                            color: Colors.indigo.shade700,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${movie.timeSlots.length} time slots',
@@ -719,7 +790,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          Icon(Icons.event_seat, size: 16, color: Colors.green.shade700),
+                          Icon(
+                            Icons.event_seat,
+                            size: 16,
+                            color: Colors.green.shade700,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${movie.totalSeats} seats',

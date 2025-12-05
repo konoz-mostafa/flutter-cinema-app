@@ -10,7 +10,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -96,7 +97,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => HomeScreen(user: user),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            HomeScreen(user: user),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },
@@ -150,10 +152,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            Colors.white,
-                            Colors.grey.shade50,
-                          ],
+                          colors: [Colors.white, Colors.grey.shade50],
                         ),
                       ),
                       child: Padding(
@@ -173,18 +172,27 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               ),
                             ),
                             const SizedBox(height: 24),
-                            Text(
-                              'Cinema Booking',
-                              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.purple.shade900,
-                                    letterSpacing: 1.2,
-                                  ),
+                            Center(
+                              child: Text(
+                                'Cinema Booking',
+                                style: Theme.of(context).textTheme.headlineLarge
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.purple.shade900,
+                                      letterSpacing: 1.2,
+                                    ),
+                                textAlign:
+                                    TextAlign.center, // يخلي النص في المنتصف
+                              ),
                             ),
+
                             const SizedBox(height: 8),
                             Text(
-                              _isRegister ? 'Create Your Account' : 'Welcome Back!',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              _isRegister
+                                  ? 'Create Your Account'
+                                  : 'Welcome Back!',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
                                     color: Colors.grey.shade600,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -259,7 +267,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         ),
                                       )
                                     : Text(
-                                        _isRegister ? 'Create Account' : 'Sign In',
+                                        _isRegister
+                                            ? 'Create Account'
+                                            : 'Sign In',
                                         style: const TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
