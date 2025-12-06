@@ -711,17 +711,13 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TextButton(
-                  // onPressed: () {
-                  //   Navigator.of(context).pop(); // يغلق AlertDialog فقط
-                  //   Navigator.of(context).popUntil(
-                  //     (route) => route.isFirst,
-                  //   ); // يرجع لأول صفحة في الستاك
-                  // },
                   onPressed: () {
-                    Navigator.of(context).pop(); // يغلق الـ AlertDialog
-                    Navigator.of(context).pop(); // يرجع صفحة SeatSelection
-                    Navigator.of(context).pop();
-                  },
+                   Navigator.of(context).pop(); // يغلق AlertDialog فقط
+                     Navigator.of(context).popUntil(
+                       (route) => route.isFirst,
+                     ); // يرجع لأول صفحة في الستاك
+                   },
+
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(

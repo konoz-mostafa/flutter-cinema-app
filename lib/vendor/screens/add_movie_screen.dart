@@ -22,7 +22,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
   @override
   void initState() {
     super.initState();
-    // If editing, pre-fill the fields
     if (isEditMode) {
       _titleController.text = widget.movieToEdit!.title;
       _descController.text = widget.movieToEdit!.description;
@@ -229,10 +228,10 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                           Expanded(
                             child: TextFormField(
                               controller: _timeSlotController,
-                  decoration: InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: 'e.g., 10:00 AM',
                                 prefixIcon: Icon(Icons.access_time, color: Colors.indigo.shade700),
-                    filled: true,
+                                filled: true,
                                 fillColor: Colors.grey.shade50,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -278,7 +277,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // Display Added Time Slots
                       if (_timeSlots.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -352,24 +350,9 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Submit Button
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.indigo.shade700,
-                        Colors.purple.shade700,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.indigo.withOpacity(0.4),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
+                // Submit Button with gradient
+                SizedBox(
+                  height: 60,
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -382,39 +365,52 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                           );
                           return;
                         }
-                        final movie = Movie(
-                          title: _titleController.text.trim(),
-                          description: _descController.text.trim(),
-                          imagePath: _imageController.text.trim(),
-                          timeSlots: _timeSlots,
-                          totalSeats: isEditMode ? widget.movieToEdit!.totalSeats : 47,
-                          bookedSeats: isEditMode ? widget.movieToEdit!.bookedSeats : [],
-                        );
+
+final movie = Movie(
+  id: UniqueKey().toString(), // او أي id يناسبك
+  title: _titleController.text.trim(),
+  description: _descController.text.trim(),
+  imagePath: _imageController.text.trim(),
+  timeSlots: List<String>.from(_timeSlots),
+  totalSeats: isEditMode ? widget.movieToEdit!.totalSeats : 47,
+  bookings: isEditMode
+      ? Map<String, List<int>>.from(widget.movieToEdit!.bookings)
+      : {for (var slot in _timeSlots) slot: []},
+);
+
                         Navigator.pop(context, movie);
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(isEditMode ? Icons.save : Icons.add_circle_outline, size: 24),
-                        const SizedBox(width: 8),
-                        Text(
-                          isEditMode ? 'Update Movie' : 'Add Movie',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.indigo.shade700, Colors.purple.shade700],
                         ),
-                      ],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(isEditMode ? Icons.save : Icons.add_circle_outline, size: 24),
+                            const SizedBox(width: 8),
+                            Text(
+                              isEditMode ? 'Update Movie' : 'Add Movie',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

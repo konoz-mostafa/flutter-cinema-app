@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Booking {
   final String id;
   final String userEmail;
@@ -15,27 +17,29 @@ class Booking {
     required this.timeSlot,
   });
 
+  // تحويل الحجز لـ Map قبل حفظه في Firestore
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'userEmail': userEmail,
       'movieId': movieId,
       'seats': seats,
-      'dateTime': dateTime.toIso8601String(),
       'timeSlot': timeSlot,
+      'dateTime': Timestamp.fromDate(dateTime), // <--- مهم
     };
   }
 
+  // تحويل بيانات Firestore لـ Booking
   factory Booking.fromMap(Map<String, dynamic> map) {
     return Booking(
       id: map['id'] ?? '',
       userEmail: map['userEmail'] ?? '',
       movieId: map['movieId'] ?? '',
       seats: List<String>.from(map['seats'] ?? []),
-      dateTime: map['dateTime'] is DateTime
-          ? map['dateTime']
-          : DateTime.parse(map['dateTime']?.toString() ?? DateTime.now().toIso8601String()),
       timeSlot: map['timeSlot'] ?? '',
+      dateTime: map['dateTime'] is Timestamp
+          ? (map['dateTime'] as Timestamp).toDate()
+          : DateTime.parse(map['dateTime']?.toString() ?? DateTime.now().toIso8601String()),
     );
   }
 }
