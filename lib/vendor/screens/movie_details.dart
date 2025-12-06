@@ -51,7 +51,11 @@ class MovieDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         child: const Center(
-                          child: Icon(Icons.movie, size: 80, color: Colors.white),
+                          child: Icon(
+                            Icons.movie,
+                            size: 80,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     )
@@ -83,7 +87,6 @@ class MovieDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
-
           // Content
           SliverToBoxAdapter(
             child: Padding(
@@ -101,7 +104,6 @@ class MovieDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   // Description Card
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -121,8 +123,11 @@ class MovieDetailsScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.description,
-                                color: Colors.indigo.shade700, size: 20),
+                            Icon(
+                              Icons.description,
+                              color: Colors.indigo.shade700,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             const Text(
                               'Description',
@@ -147,7 +152,6 @@ class MovieDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   // Time Slots Card
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -167,8 +171,11 @@ class MovieDetailsScreen extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.schedule,
-                                color: Colors.indigo.shade700, size: 20),
+                            Icon(
+                              Icons.schedule,
+                              color: Colors.indigo.shade700,
+                              size: 20,
+                            ),
                             const SizedBox(width: 8),
                             const Text(
                               'Time Slots',
@@ -187,7 +194,9 @@ class MovieDetailsScreen extends StatelessWidget {
                           children: movie.timeSlots.map((slot) {
                             return Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 10),
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
@@ -219,7 +228,6 @@ class MovieDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   // View Seats Button
                   Container(
                     width: double.infinity,
@@ -240,7 +248,31 @@ class MovieDetailsScreen extends StatelessWidget {
                       ],
                     ),
                     child: ElevatedButton.icon(
-                      onPressed: () => _showTimeSlotDialog(context),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    SeatsViewScreen(movie: movie),
+                            transitionsBuilder:
+                                (
+                                  context,
+                                  animation,
+                                  secondaryAnimation,
+                                  child,
+                                ) {
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0.0, 1.0),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: child,
+                                  );
+                                },
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.event_seat, size: 24),
                       label: const Text(
                         'View Seats',
@@ -267,50 +299,6 @@ class MovieDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  // Dialog to select Time Slot before opening SeatsViewScreen
-  void _showTimeSlotDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Select Time Slot",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              ...movie.timeSlots.map((slot) {
-                return ListTile(
-                  leading: const Icon(Icons.schedule),
-                  title: Text(slot),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SeatsViewScreen(
-                          movie: movie,
-                          selectedTimeSlot: slot,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              }).toList(),
-            ],
-          ),
-        );
-      },
     );
   }
 }

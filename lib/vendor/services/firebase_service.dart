@@ -33,15 +33,13 @@ class FirebaseService {
       final Map<String, Movie> moviesMap = {};
       for (var doc in snapshot.docs) {
         final data = doc.data();
-moviesMap[doc.id] = Movie(
-  id: doc.id, // <--- مهم تمرريه
-  title: data['title'] ?? '',
-  description: data['description'] ?? '',
-  imagePath: data['posterUrl'] ?? data['imagePath'] ?? '',
-  timeSlots: List<String>.from(data['timeSlots'] ?? []),
-  totalSeats: data['totalSeats'] ?? 47,
-);
-
+        moviesMap[doc.id] = Movie(
+          title: data['title'] ?? '',
+          description: data['description'] ?? '',
+          imagePath: data['posterUrl'] ?? data['imagePath'] ?? '',
+          timeSlots: List<String>.from(data['timeSlots'] ?? []),
+          totalSeats: data['totalSeats'] ?? 47,
+        );
       }
       print('Returning ${moviesMap.length} movies');
       return moviesMap;
