@@ -1,5 +1,8 @@
+// import 'dart:io';
 // import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
 // import '../models/movie_model.dart';
+// import 'package:flutter/foundation.dart'; // اضف ده في بداية الملف
 
 // class AddMovieScreen extends StatefulWidget {
 //   final Movie? movieToEdit; // If provided, we're in edit mode
@@ -17,12 +20,13 @@
 //   final _imageController = TextEditingController();
 //   final _timeSlotController = TextEditingController();
 //   List<String> _timeSlots = [];
+//   File? _localImage;
+
 //   bool get isEditMode => widget.movieToEdit != null;
 
 //   @override
 //   void initState() {
 //     super.initState();
-//     // If editing, pre-fill the fields
 //     if (isEditMode) {
 //       _titleController.text = widget.movieToEdit!.title;
 //       _descController.text = widget.movieToEdit!.description;
@@ -56,6 +60,18 @@
 //     });
 //   }
 
+//   Future<void> _pickLocalImage() async {
+//     final pickedFile = await ImagePicker().pickImage(
+//       source: ImageSource.gallery,
+//     );
+//     if (pickedFile != null) {
+//       setState(() {
+//         _localImage = File(pickedFile.path);
+//         _imageController.text = pickedFile.path;
+//       });
+//     }
+//   }
+
 //   @override
 //   Widget build(BuildContext context) {
 //     return Scaffold(
@@ -69,8 +85,8 @@
 //               begin: Alignment.topLeft,
 //               end: Alignment.bottomRight,
 //               colors: [
-//                 Colors.indigo.shade700,
-//                 Colors.purple.shade700,
+//                 Colors.indigo.shade400,
+//                 Color.fromARGB(255, 149, 125, 173),
 //               ],
 //             ),
 //           ),
@@ -97,8 +113,8 @@
 //                       begin: Alignment.topLeft,
 //                       end: Alignment.bottomRight,
 //                       colors: [
-//                         Colors.indigo.shade700,
-//                         Colors.purple.shade700,
+//                         Colors.indigo.shade400,
+//                         Color.fromARGB(255, 149, 125, 173),
 //                       ],
 //                     ),
 //                     borderRadius: BorderRadius.circular(20),
@@ -135,7 +151,9 @@
 //                       ),
 //                       const SizedBox(height: 8),
 //                       Text(
-//                         isEditMode ? 'Update the details below' : 'Fill in the details below',
+//                         isEditMode
+//                             ? 'Update the details below'
+//                             : 'Fill in the details below',
 //                         style: TextStyle(
 //                           color: Colors.white.withOpacity(0.9),
 //                           fontSize: 14,
@@ -151,12 +169,16 @@
 //                   decoration: InputDecoration(
 //                     labelText: 'Movie Title',
 //                     hintText: 'Enter movie title',
-//                     prefixIcon: Icon(Icons.title, color: Colors.indigo.shade700),
+//                     prefixIcon: Icon(
+//                       Icons.title,
+//                       color: Colors.indigo.shade400,
+//                     ),
 //                     filled: true,
 //                     fillColor: Colors.white,
 //                   ),
-//                   validator: (value) =>
-//                       value == null || value.isEmpty ? "Please enter a title" : null,
+//                   validator: (value) => value == null || value.isEmpty
+//                       ? "Please enter a title"
+//                       : null,
 //                   style: const TextStyle(fontSize: 16),
 //                 ),
 //                 const SizedBox(height: 20),
@@ -166,30 +188,129 @@
 //                   decoration: InputDecoration(
 //                     labelText: 'Description',
 //                     hintText: 'Enter movie description',
-//                     prefixIcon: Icon(Icons.description, color: Colors.indigo.shade700),
+//                     prefixIcon: Icon(
+//                       Icons.description,
+//                       color: Colors.indigo.shade400,
+//                     ),
 //                     filled: true,
 //                     fillColor: Colors.white,
 //                   ),
 //                   maxLines: 4,
-//                   validator: (value) =>
-//                       value == null || value.isEmpty ? "Please enter a description" : null,
+//                   validator: (value) => value == null || value.isEmpty
+//                       ? "Please enter a description"
+//                       : null,
 //                   style: const TextStyle(fontSize: 16),
 //                 ),
 //                 const SizedBox(height: 20),
-//                 // Poster URL Field
-//                 TextFormField(
-//                   controller: _imageController,
-//                   decoration: InputDecoration(
-//                     labelText: 'Poster URL',
-//                     hintText: 'https://images.unsplash.com/...',
-//                     prefixIcon: Icon(Icons.image, color: Colors.indigo.shade700),
-//                     filled: true,
-//                     fillColor: Colors.white,
-//                     helperText: 'Enter a valid image URL from the internet',
-//                     helperStyle: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-//                   ),
-//                   style: const TextStyle(fontSize: 16),
+//                 // // Poster URL or Local Image
+//                 // Column(
+//                 //   crossAxisAlignment: CrossAxisAlignment.start,
+//                 //   children: [
+//                 //     TextFormField(
+//                 //       controller: _imageController,
+//                 //       decoration: InputDecoration(
+//                 //         labelText: 'Poster URL or Local Path',
+//                 //         prefixIcon: Icon(
+//                 //           Icons.image,
+//                 //           color: Colors.indigo.shade700,
+//                 //         ),
+//                 //         filled: true,
+//                 //         fillColor: Colors.white,
+//                 //       ),
+//                 //       style: const TextStyle(fontSize: 16),
+//                 //     ),
+//                 //     const SizedBox(height: 10),
+//                 //     ElevatedButton.icon(
+//                 //       onPressed: _pickLocalImage,
+//                 //       icon: const Icon(Icons.photo_library),
+//                 //       label: const Text('Choose from device'),
+//                 //       style: ElevatedButton.styleFrom(
+//                 //         backgroundColor: Colors.indigo.shade700,
+//                 //       ),
+//                 //     ),
+//                 //     if (_localImage != null)
+//                 //       Padding(
+//                 //         padding: const EdgeInsets.only(top: 10),
+//                 //         child: Image.file(
+//                 //           _localImage!,
+//                 //           height: 150,
+//                 //           fit: BoxFit.cover,
+//                 //         ),
+//                 //       ),
+//                 //   ],
+//                 // ),
+//                 // Poster URL or Local Image
+//                 Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Container(
+//                       padding: const EdgeInsets.all(12),
+//                       decoration: BoxDecoration(
+//                         color: Colors.white,
+//                         borderRadius: BorderRadius.circular(12),
+//                         boxShadow: [
+//                           BoxShadow(
+//                             color: Colors.black12,
+//                             blurRadius: 6,
+//                             offset: Offset(0, 3),
+//                           ),
+//                         ],
+//                       ),
+//                       child: TextFormField(
+//                         controller: _imageController,
+//                         decoration: InputDecoration(
+//                           labelText: 'Poster URL or Local Path',
+//                           prefixIcon: Icon(
+//                             Icons.image,
+//                             color: Colors.indigo.shade700,
+//                           ),
+//                           border: InputBorder.none,
+//                         ),
+//                         style: const TextStyle(fontSize: 16),
+//                       ),
+//                     ),
+//                     const SizedBox(height: 12),
+//                     SizedBox(
+//                       width: double.infinity,
+//                       child: ElevatedButton.icon(
+//                         onPressed: _pickLocalImage,
+//                         icon: const Icon(Icons.photo_library),
+//                         label: const Text('Choose from device'),
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor: const Color.fromARGB(
+//                             255,
+//                             118,
+//                             114,
+//                             122,
+//                           ),
+//                           padding: const EdgeInsets.symmetric(vertical: 14),
+//                           shape: RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(10),
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                     const SizedBox(height: 12),
+//                     if (_localImage != null)
+//                       ClipRRect(
+//                         borderRadius: BorderRadius.circular(12),
+//                         child: kIsWeb
+//                             ? Image.network(
+//                                 _imageController.text,
+//                                 height: 150,
+//                                 width: double.infinity,
+//                                 fit: BoxFit.cover,
+//                               )
+//                             : Image.file(
+//                                 _localImage!,
+//                                 height: 150,
+//                                 width: double.infinity,
+//                                 fit: BoxFit.cover,
+//                               ),
+//                       ),
+//                   ],
 //                 ),
+
 //                 const SizedBox(height: 20),
 //                 // Time Slots Section
 //                 Container(
@@ -210,7 +331,11 @@
 //                     children: [
 //                       Row(
 //                         children: [
-//                           Icon(Icons.schedule, color: Colors.indigo.shade700, size: 20),
+//                           Icon(
+//                             Icons.schedule,
+//                             color: Colors.indigo.shade400,
+//                             size: 20,
+//                           ),
 //                           const SizedBox(width: 8),
 //                           const Text(
 //                             'Time Slots',
@@ -223,28 +348,37 @@
 //                         ],
 //                       ),
 //                       const SizedBox(height: 16),
-//                       // Time Slot Input and Add Button
 //                       Row(
 //                         children: [
 //                           Expanded(
 //                             child: TextFormField(
 //                               controller: _timeSlotController,
-//                   decoration: InputDecoration(
+//                               decoration: InputDecoration(
 //                                 hintText: 'e.g., 10:00 AM',
-//                                 prefixIcon: Icon(Icons.access_time, color: Colors.indigo.shade700),
-//                     filled: true,
+//                                 prefixIcon: Icon(
+//                                   Icons.access_time,
+//                                   color: Colors.indigo.shade400,
+//                                 ),
+//                                 filled: true,
 //                                 fillColor: Colors.grey.shade50,
 //                                 border: OutlineInputBorder(
 //                                   borderRadius: BorderRadius.circular(12),
-//                                   borderSide: BorderSide(color: Colors.grey.shade300),
+//                                   borderSide: BorderSide(
+//                                     color: Colors.grey.shade300,
+//                                   ),
 //                                 ),
 //                                 enabledBorder: OutlineInputBorder(
 //                                   borderRadius: BorderRadius.circular(12),
-//                                   borderSide: BorderSide(color: Colors.grey.shade300),
+//                                   borderSide: BorderSide(
+//                                     color: Colors.grey.shade300,
+//                                   ),
 //                                 ),
 //                                 focusedBorder: OutlineInputBorder(
 //                                   borderRadius: BorderRadius.circular(12),
-//                                   borderSide: BorderSide(color: Colors.indigo.shade700, width: 2),
+//                                   borderSide: BorderSide(
+//                                     color: Colors.indigo.shade400,
+//                                     width: 2,
+//                                   ),
 //                                 ),
 //                               ),
 //                               style: const TextStyle(fontSize: 16),
@@ -256,8 +390,8 @@
 //                             decoration: BoxDecoration(
 //                               gradient: LinearGradient(
 //                                 colors: [
-//                                   Colors.indigo.shade600,
-//                                   Colors.purple.shade600,
+//                                   Colors.indigo.shade400,
+//                                   Color.fromARGB(255, 149, 125, 173),
 //                                 ],
 //                               ),
 //                               borderRadius: BorderRadius.circular(12),
@@ -278,7 +412,6 @@
 //                         ],
 //                       ),
 //                       const SizedBox(height: 16),
-//                       // Display Added Time Slots
 //                       if (_timeSlots.isEmpty)
 //                         Padding(
 //                           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -297,12 +430,15 @@
 //                           runSpacing: 10,
 //                           children: List.generate(_timeSlots.length, (index) {
 //                             return Container(
-//                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+//                               padding: const EdgeInsets.symmetric(
+//                                 horizontal: 16,
+//                                 vertical: 10,
+//                               ),
 //                               decoration: BoxDecoration(
 //                                 gradient: LinearGradient(
 //                                   colors: [
-//                                     Colors.indigo.shade600,
-//                                     Colors.purple.shade600,
+//                                     Colors.indigo.shade400,
+//                                     Color.fromARGB(255, 149, 125, 173),
 //                                   ],
 //                                 ),
 //                                 borderRadius: BorderRadius.circular(20),
@@ -317,7 +453,11 @@
 //                               child: Row(
 //                                 mainAxisSize: MainAxisSize.min,
 //                                 children: [
-//                                   Icon(Icons.schedule, color: Colors.white, size: 16),
+//                                   Icon(
+//                                     Icons.schedule,
+//                                     color: Colors.white,
+//                                     size: 16,
+//                                   ),
 //                                   const SizedBox(width: 6),
 //                                   Text(
 //                                     _timeSlots[index],
@@ -356,10 +496,7 @@
 //                 Container(
 //                   decoration: BoxDecoration(
 //                     gradient: LinearGradient(
-//                       colors: [
-//                         Colors.indigo.shade700,
-//                         Colors.purple.shade700,
-//                       ],
+//                       colors: [Colors.indigo.shade400, Colors.purple.shade700],
 //                     ),
 //                     borderRadius: BorderRadius.circular(16),
 //                     boxShadow: [
@@ -376,7 +513,9 @@
 //                         if (_timeSlots.isEmpty) {
 //                           ScaffoldMessenger.of(context).showSnackBar(
 //                             const SnackBar(
-//                               content: Text('Please add at least one time slot'),
+//                               content: Text(
+//                                 'Please add at least one time slot',
+//                               ),
 //                               backgroundColor: Colors.red,
 //                             ),
 //                           );
@@ -387,8 +526,12 @@
 //                           description: _descController.text.trim(),
 //                           imagePath: _imageController.text.trim(),
 //                           timeSlots: _timeSlots,
-//                           totalSeats: isEditMode ? widget.movieToEdit!.totalSeats : 47,
-//                           bookedSeats: isEditMode ? widget.movieToEdit!.bookedSeats : [],
+//                           totalSeats: isEditMode
+//                               ? widget.movieToEdit!.totalSeats
+//                               : 47,
+//                           bookedSeats: isEditMode
+//                               ? widget.movieToEdit!.bookedSeats
+//                               : [],
 //                         );
 //                         Navigator.pop(context, movie);
 //                       }
@@ -404,7 +547,10 @@
 //                     child: Row(
 //                       mainAxisAlignment: MainAxisAlignment.center,
 //                       children: [
-//                         Icon(isEditMode ? Icons.save : Icons.add_circle_outline, size: 24),
+//                         Icon(
+//                           isEditMode ? Icons.save : Icons.add_circle_outline,
+//                           size: 24,
+//                         ),
 //                         const SizedBox(width: 8),
 //                         Text(
 //                           isEditMode ? 'Update Movie' : 'Add Movie',
@@ -428,13 +574,13 @@
 //   }
 // }
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/movie_model.dart';
-import 'package:flutter/foundation.dart'; // اضف ده في بداية الملف
 
 class AddMovieScreen extends StatefulWidget {
-  final Movie? movieToEdit; // If provided, we're in edit mode
+  final Movie? movieToEdit;
 
   const AddMovieScreen({super.key, this.movieToEdit});
 
@@ -489,10 +635,36 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
     });
   }
 
-  Future<void> _pickLocalImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a photo'),
+              onTap: () {
+                Navigator.of(context).pop();
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
     );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
       setState(() {
         _localImage = File(pickedFile.path);
@@ -534,7 +706,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header Card
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -592,7 +763,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Title Field
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
@@ -611,7 +781,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
-                // Description Field
                 TextFormField(
                   controller: _descController,
                   decoration: InputDecoration(
@@ -631,44 +800,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 20),
-                // // Poster URL or Local Image
-                // Column(
-                //   crossAxisAlignment: CrossAxisAlignment.start,
-                //   children: [
-                //     TextFormField(
-                //       controller: _imageController,
-                //       decoration: InputDecoration(
-                //         labelText: 'Poster URL or Local Path',
-                //         prefixIcon: Icon(
-                //           Icons.image,
-                //           color: Colors.indigo.shade700,
-                //         ),
-                //         filled: true,
-                //         fillColor: Colors.white,
-                //       ),
-                //       style: const TextStyle(fontSize: 16),
-                //     ),
-                //     const SizedBox(height: 10),
-                //     ElevatedButton.icon(
-                //       onPressed: _pickLocalImage,
-                //       icon: const Icon(Icons.photo_library),
-                //       label: const Text('Choose from device'),
-                //       style: ElevatedButton.styleFrom(
-                //         backgroundColor: Colors.indigo.shade700,
-                //       ),
-                //     ),
-                //     if (_localImage != null)
-                //       Padding(
-                //         padding: const EdgeInsets.only(top: 10),
-                //         child: Image.file(
-                //           _localImage!,
-                //           height: 150,
-                //           fit: BoxFit.cover,
-                //         ),
-                //       ),
-                //   ],
-                // ),
-                // Poster URL or Local Image
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -702,9 +833,9 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
-                        onPressed: _pickLocalImage,
+                        onPressed: _showImageSourceDialog,
                         icon: const Icon(Icons.photo_library),
-                        label: const Text('Choose from device'),
+                        label: const Text('Choose Image'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
                             255,
@@ -739,9 +870,7 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                       ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-                // Time Slots Section
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -921,7 +1050,6 @@ class _AddMovieScreenState extends State<AddMovieScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Submit Button
                 Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
