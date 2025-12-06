@@ -354,8 +354,8 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Color(0xFFE0BBE4), // موف فاتح
-                Color(0xFF957DAD), // أزرق فاتح / بنفسجي
+                Color.fromRGBO(92, 107, 192, 1),
+                Color.fromARGB(255, 149, 125, 173),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -778,7 +778,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Icon(
                             Icons.access_time,
                             size: 16,
-                            color: Colors.indigo.shade700,
+                            color: Color.fromRGBO(92, 107, 192, 1),
                           ),
                           const SizedBox(width: 4),
                           Text(

@@ -1,3 +1,43 @@
+// class Booking {
+//   final String id;
+//   final String userEmail;
+//   final String movieId;
+//   final List<String> seats;
+//   final DateTime dateTime;
+//   final String timeSlot;
+
+//   Booking({
+//     required this.id,
+//     required this.userEmail,
+//     required this.movieId,
+//     required this.seats,
+//     required this.dateTime,
+//     required this.timeSlot,
+//   });
+
+//   Map<String, dynamic> toMap() {
+//     return {
+//       'id': id,
+//       'userEmail': userEmail,
+//       'movieId': movieId,
+//       'seats': seats,
+//       'dateTime': dateTime.toIso8601String(),
+//       'timeSlot': timeSlot,
+//     };
+//   }
+
+//   factory Booking.fromMap(Map<String, dynamic> map) {
+//     return Booking(
+//       id: map['id'] ?? '',
+//       userEmail: map['userEmail'] ?? '',
+//       movieId: map['movieId'] ?? '',
+//       seats: List<String>.from(map['seats'] ?? []),
+//       dateTime: DateTime.parse(map['dateTime'] ?? DateTime.now().toIso8601String()),
+//       timeSlot: map['timeSlot'] ?? '',
+//     );
+//   }
+// }
+
 class Booking {
   final String id;
   final String userEmail;
@@ -15,25 +55,49 @@ class Booking {
     required this.timeSlot,
   });
 
+  factory Booking.fromMap(Map<String, dynamic> map, String id) {
+    return Booking(
+      id: id,
+      userEmail: map['userEmail'] ?? '',
+      movieId: map['movieId'] ?? '',
+      seats: List<String>.from(map['seats'] ?? []),
+      dateTime: map['dateTime'] != null
+          ? (map['dateTime'] as dynamic).toDate()
+          : DateTime.now(),
+      timeSlot: map['timeSlot'] ?? '',
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'userEmail': userEmail,
       'movieId': movieId,
       'seats': seats,
-      'dateTime': dateTime.toIso8601String(),
+      'dateTime': dateTime,
       'timeSlot': timeSlot,
     };
   }
 
-  factory Booking.fromMap(Map<String, dynamic> map) {
+  Booking copyWith({
+    String? id,
+    String? userEmail,
+    String? movieId,
+    List<String>? seats,
+    DateTime? dateTime,
+    String? timeSlot,
+  }) {
     return Booking(
-      id: map['id'] ?? '',
-      userEmail: map['userEmail'] ?? '',
-      movieId: map['movieId'] ?? '',
-      seats: List<String>.from(map['seats'] ?? []),
-      dateTime: DateTime.parse(map['dateTime'] ?? DateTime.now().toIso8601String()),
-      timeSlot: map['timeSlot'] ?? '',
+      id: id ?? this.id,
+      userEmail: userEmail ?? this.userEmail,
+      movieId: movieId ?? this.movieId,
+      seats: seats ?? this.seats,
+      dateTime: dateTime ?? this.dateTime,
+      timeSlot: timeSlot ?? this.timeSlot,
     );
+  }
+
+  @override
+  String toString() {
+    return 'Booking(id: $id, userEmail: $userEmail, movieId: $movieId, seats: $seats, dateTime: $dateTime, timeSlot: $timeSlot)';
   }
 }
