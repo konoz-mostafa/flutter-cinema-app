@@ -54,7 +54,6 @@
 //   void _toggleSeat(String seatId) {
 //     final status = _getSeatStatus(seatId);
 //     if (status == 'booked') return;
-
 //     setState(() {
 //       if (_selectedSeats.contains(seatId)) {
 //         _selectedSeats.remove(seatId);
@@ -90,7 +89,6 @@
 
 //     try {
 //       await AppState.createBooking(booking);
-
 //       if (mounted) {
 //         showDialog(
 //           context: context,
@@ -132,10 +130,12 @@
 //                 ),
 //                 child: TextButton(
 //                   onPressed: () {
-//                     Navigator.of(context).pop();
-//                     Navigator.of(context).pop();
-//                     Navigator.of(context).pop();
+//                     Navigator.of(context).pop(); // يغلق AlertDialog فقط
+//                     Navigator.of(context).popUntil(
+//                       (route) => route.isFirst,
+//                     ); // يرجع لأول صفحة في الستاك
 //                   },
+
 //                   style: TextButton.styleFrom(
 //                     padding: const EdgeInsets.symmetric(vertical: 14),
 //                     shape: RoundedRectangleBorder(
@@ -399,46 +399,50 @@
 //                     ),
 //                   ),
 //                   const SizedBox(height: 40),
-//                   // Seats Layout
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     children: [
-//                       // Left section
-//                       Column(
-//                         children: List.generate(5, (row) {
-//                           return Padding(
-//                             padding: const EdgeInsets.only(bottom: 10.0),
-//                             child: Row(
-//                               children: List.generate(4, (col) {
-//                                 final seatId = '$row-$col-L';
-//                                 return Padding(
-//                                   padding: const EdgeInsets.only(right: 10.0),
-//                                   child: _buildSeat(seatId),
-//                                 );
-//                               }),
-//                             ),
-//                           );
-//                         }),
-//                       ),
-//                       const SizedBox(width: 40),
-//                       // Right section
-//                       Column(
-//                         children: List.generate(5, (row) {
-//                           return Padding(
-//                             padding: const EdgeInsets.only(bottom: 10.0),
-//                             child: Row(
-//                               children: List.generate(6, (col) {
-//                                 final seatId = '$row-$col-R';
-//                                 return Padding(
-//                                   padding: const EdgeInsets.only(right: 10.0),
-//                                   child: _buildSeat(seatId),
-//                                 );
-//                               }),
-//                             ),
-//                           );
-//                         }),
-//                       ),
-//                     ],
+//                   // Seats Layout Scrollable
+//                   SingleChildScrollView(
+//                     scrollDirection: Axis.horizontal,
+//                     padding: const EdgeInsets.symmetric(horizontal: 20),
+//                     child: Row(
+//                       mainAxisAlignment: MainAxisAlignment.center,
+//                       children: [
+//                         // Left section
+//                         Column(
+//                           children: List.generate(5, (row) {
+//                             return Padding(
+//                               padding: const EdgeInsets.only(bottom: 10.0),
+//                               child: Row(
+//                                 children: List.generate(4, (col) {
+//                                   final seatId = '$row-$col-L';
+//                                   return Padding(
+//                                     padding: const EdgeInsets.only(right: 10.0),
+//                                     child: _buildSeat(seatId),
+//                                   );
+//                                 }),
+//                               ),
+//                             );
+//                           }),
+//                         ),
+//                         const SizedBox(width: 40),
+//                         // Right section
+//                         Column(
+//                           children: List.generate(5, (row) {
+//                             return Padding(
+//                               padding: const EdgeInsets.only(bottom: 10.0),
+//                               child: Row(
+//                                 children: List.generate(6, (col) {
+//                                   final seatId = '$row-$col-R';
+//                                   return Padding(
+//                                     padding: const EdgeInsets.only(right: 10.0),
+//                                     child: _buildSeat(seatId),
+//                                   );
+//                                 }),
+//                               ),
+//                             );
+//                           }),
+//                         ),
+//                       ],
+//                     ),
 //                   ),
 //                   const SizedBox(height: 40),
 //                   // Legend
@@ -712,12 +716,9 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                 ),
                 child: TextButton(
                   onPressed: () {
-                   Navigator.of(context).pop(); // يغلق AlertDialog فقط
-                     Navigator.of(context).popUntil(
-                       (route) => route.isFirst,
-                     ); // يرجع لأول صفحة في الستاك
-                   },
-
+                    Navigator.of(context).pop();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -904,7 +905,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // Movie Info Card
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -952,7 +952,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // Screen
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
@@ -981,53 +980,61 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Seats Layout Scrollable
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        // Left section
-                        Column(
-                          children: List.generate(5, (row) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
-                              child: Row(
-                                children: List.generate(4, (col) {
-                                  final seatId = '$row-$col-L';
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 10.0),
-                                    child: _buildSeat(seatId),
-                                  );
-                                }),
-                              ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(width: 40),
-                        // Right section
-                        Column(
-                          children: List.generate(5, (row) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 10.0),
-                              child: Row(
-                                children: List.generate(6, (col) {
-                                  final seatId = '$row-$col-R';
-                                  return Padding(
-                                    padding: const EdgeInsets.only(right: 10.0),
-                                    child: _buildSeat(seatId),
-                                  );
-                                }),
-                              ),
-                            );
-                          }),
+                        // باقي الصفوف 5 على الشمال و 4 على اليمين
+                        ...List.generate(4, (row) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: Row(
+                              children: [
+                                Row(
+                                  children: List.generate(5, (col) {
+                                    final seatId = '$row-$col-L';
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 10.0,
+                                      ),
+                                      child: _buildSeat(seatId),
+                                    );
+                                  }),
+                                ),
+                                const SizedBox(width: 40),
+                                Row(
+                                  children: List.generate(4, (col) {
+                                    final seatId = '$row-$col-R';
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 10.0,
+                                      ),
+                                      child: _buildSeat(seatId),
+                                    );
+                                  }),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        // الصف الأخير 11 كرسي متصل
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10.0),
+                          child: Row(
+                            children: List.generate(11, (col) {
+                              final seatId = '4-$col';
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10.0),
+                                child: _buildSeat(seatId),
+                              );
+                            }),
+                          ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Legend
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -1068,7 +1075,6 @@ class _SeatSelectionScreenState extends State<SeatSelectionScreen> {
               ),
             ),
           ),
-          // Bottom Bar
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
