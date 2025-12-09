@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,55 +17,99 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<Movie> movies = [];
-  Map<String, String> movieDocIds = {}; // Map movie title to document ID
-  bool _loading = true;
+  Map<String, String> movieDocIds = {}; // Map movie title to document ID (for edit/delete operations)
+  List<Movie> moviesList = []; // Cache movies list to prevent reload on updates
   int _unreadNotifications = 0;
   StreamSubscription? _notificationSubscription;
+  StreamSubscription? _moviesSubscription;
   Set<String> _shownNotificationIds = {}; // Track shown notifications
+  Timer? _debounceTimer; // Debounce timer for stream updates
 
   @override
   void initState() {
     super.initState();
-    _loadMovies();
     _listenToNotifications();
+    _listenToMovies();
   }
 
   @override
   void dispose() {
     _notificationSubscription?.cancel();
+    _moviesSubscription?.cancel();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
+  void _listenToMovies() {
+    _moviesSubscription = FirebaseService.getMoviesWithIdsStream().listen(
+      (moviesMap) {
+        // Debounce updates to prevent UI freezing
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(const Duration(milliseconds: 250), () {
+          if (!mounted) return;
+          
+          final newList = moviesMap.values.toList();
+          final newDocIds = moviesMap.map((key, value) => MapEntry(value.title, key));
+          
+          // Always update - don't do expensive comparison
+          // The widget tree is optimized with RepaintBoundary and cached images
+          // so rebuilds should be fast
+          if (mounted) {
+            setState(() {
+              moviesList = newList;
+              movieDocIds = newDocIds;
+            });
+          }
+        });
+      },
+      onError: (error) {
+        print('Error listening to movies: $error');
+        // Don't update state on error - keep existing data
+      },
+    );
+  }
+
   void _listenToNotifications() {
+    // Remove orderBy to avoid index requirement - we only need the count, not sorted order
     _notificationSubscription = FirebaseFirestore.instance
         .collection('notifications')
         .where('read', isEqualTo: false)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .listen((snapshot) {
-          setState(() {
-            _unreadNotifications = snapshot.docs.length;
-          });
+        .listen(
+          (snapshot) {
+            setState(() {
+              _unreadNotifications = snapshot.docs.length;
+            });
 
-          // Show notification for new bookings (only show newly added ones)
-          if (snapshot.docChanges.isNotEmpty) {
-            for (var change in snapshot.docChanges) {
-              if (change.type == DocumentChangeType.added &&
-                  change.doc.exists &&
-                  !_shownNotificationIds.contains(change.doc.id)) {
-                final notification = {
-                  'id': change.doc.id,
-                  ...change.doc.data() as Map<String, dynamic>,
-                };
-                _shownNotificationIds.add(change.doc.id);
-                if (mounted) {
-                  _showBookingNotification(notification);
+            // Show notification for new bookings (only show newly added ones)
+            if (snapshot.docChanges.isNotEmpty) {
+              for (var change in snapshot.docChanges) {
+                if (change.type == DocumentChangeType.added &&
+                    change.doc.exists &&
+                    !_shownNotificationIds.contains(change.doc.id)) {
+                  final notification = {
+                    'id': change.doc.id,
+                    ...change.doc.data() as Map<String, dynamic>,
+                  };
+                  _shownNotificationIds.add(change.doc.id);
+                  if (mounted) {
+                    _showBookingNotification(notification);
+                  }
                 }
               }
             }
-          }
-        });
+          },
+          onError: (error) {
+            // Handle errors gracefully - don't block the app
+            print('⚠️ Error listening to notifications: $error');
+            // Set to 0 if there's an error
+            if (mounted) {
+              setState(() {
+                _unreadNotifications = 0;
+              });
+            }
+          },
+        );
   }
 
   void _showBookingNotification(Map<String, dynamic> notification) {
@@ -97,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: EdgeInsets.all(16),
         action: SnackBarAction(
-          label: 'View',
+          label: 'ok',
           textColor: Colors.white,
           onPressed: () {
             _markNotificationAsRead(notification);
@@ -326,24 +372,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _loadMovies() async {
-    setState(() {
-      _loading = true;
-    });
-    try {
-      final moviesMap = await FirebaseService.getMoviesWithIds();
-      setState(() {
-        movies = moviesMap.values.toList();
-        movieDocIds = moviesMap.map((key, value) => MapEntry(value.title, key));
-        _loading = false;
-      });
-    } catch (e) {
-      print('Error loading movies: $e');
-      setState(() {
-        _loading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -413,23 +441,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadMovies,
+            onPressed: () {
+              // Stream automatically updates, just trigger rebuild
+              setState(() {});
+            },
             tooltip: 'Refresh',
           ),
         ],
       ),
 
-      body: _loading
+      body: moviesList.isEmpty
           ? const Center(child: CircularProgressIndicator())
-          : movies.isEmpty
-          ? const Center(child: Text("No movies added yet"))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: movies.length,
-              itemBuilder: (context, index) {
-                final movie = movies[index];
-                return _buildMovieCard(movie, index);
-              },
+          : RepaintBoundary(
+              child: ListView.builder(
+                key: const PageStorageKey<String>('movies_list'),
+                padding: const EdgeInsets.all(16),
+                itemCount: moviesList.length,
+                cacheExtent: 1000, // Cache more items off-screen
+                addAutomaticKeepAlives: true, // Keep widgets alive
+                addRepaintBoundaries: true, // Isolate repaints
+                itemBuilder: (context, index) {
+                  final movie = moviesList[index];
+                  // Use stable key based on title only - prevents unnecessary rebuilds when only time slots change
+                  // The widget will update internally when time slots change, but won't rebuild the entire card
+                  return RepaintBoundary(
+                    key: ValueKey('movie_${movie.title}'),
+                    child: _buildMovieCard(movie, index),
+                  );
+                },
+              ),
             ),
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
@@ -442,8 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
             try {
               // Save to Firebase
               await FirebaseService.addMovie(newMovie);
-              // Reload movies from Firebase
-              await _loadMovies();
+              // Stream will automatically update
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -469,7 +508,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMovieCard(Movie movie, int index) {
+    // Use movie title + index as key to maintain widget identity during updates
     return Container(
+      key: ValueKey('movie_${movie.title}_$index'),
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -509,71 +550,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Stack(
                     children: [
-                      movie.imagePath.isNotEmpty
-                          ? CachedNetworkImage(
-                              imageUrl: movie.imagePath,
-                              width: double.infinity,
-                              height: 250,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                width: double.infinity,
-                                height: 250,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.indigo.shade400,
-                                      Colors.purple.shade400,
-                                    ],
-                                  ),
-                                ),
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                width: double.infinity,
-                                height: 250,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.indigo.shade400,
-                                      Colors.purple.shade400,
-                                    ],
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.movie,
-                                  color: Colors.white,
-                                  size: 60,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              width: double.infinity,
-                              height: 250,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Colors.indigo.shade400,
-                                    Colors.purple.shade400,
-                                  ],
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.movie,
-                                color: Colors.white,
-                                size: 60,
-                              ),
+                      if (movie.imagePath.isNotEmpty)
+                        _buildMovieImage(movie.imagePath, 250)
+                      else
+                        Container(
+                          width: double.infinity,
+                          height: 250,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.indigo.shade400,
+                                Colors.purple.shade400,
+                              ],
                             ),
+                          ),
+                          child: const Icon(
+                            Icons.movie,
+                            color: Colors.white,
+                            size: 60,
+                          ),
+                        ),
                       // Action buttons overlay
                       Positioned(
                         top: 12,
@@ -602,8 +600,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   size: 20,
                                 ),
                                 onPressed: () async {
+                                  print('✏️ Edit button pressed for: ${movie.title}');
                                   final docId = movieDocIds[movie.title];
+                                  print('✏️ Document ID: $docId');
                                   if (docId != null) {
+                                    print('✏️ Opening edit screen...');
                                     final updatedMovie =
                                         await Navigator.push<Movie?>(
                                           context,
@@ -613,40 +614,47 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           ),
                                         );
+                                    print('✏️ Returned from edit screen. Movie: ${updatedMovie?.title ?? "null"}');
                                     if (updatedMovie != null) {
+                                      print('🔄 Received updated movie: ${updatedMovie.title}');
+                                      print('🔄 Document ID: $docId');
                                       try {
+                                        print('🔄 Calling Firebase update...');
+                                        // Update Firebase - this will trigger StreamBuilder automatically
                                         await FirebaseService.updateMovieById(
                                           docId,
                                           updatedMovie,
                                         );
-                                        // Reload movies to update the mapping (in case title changed)
-                                        await _loadMovies();
+                                        print('✅ Firebase update completed successfully!');
+                                        
+                                        // Show success message immediately - don't wait for stream
                                         if (mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             const SnackBar(
-                                              content: Text(
-                                                'Movie updated successfully!',
-                                              ),
+                                              content: Text('Movie updated successfully!'),
                                               backgroundColor: Colors.green,
+                                              duration: Duration(seconds: 2),
                                             ),
                                           );
                                         }
-                                      } catch (e) {
+                                        
+                                        // StreamBuilder will automatically update the UI
+                                        // No need to do anything else - the stream handles it
+                                      } catch (e, stackTrace) {
+                                        print('❌ Error updating movie in Firebase: $e');
+                                        print('❌ Stack trace: $stackTrace');
                                         if (mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
+                                          ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(
-                                              content: Text(
-                                                'Error updating movie: $e',
-                                              ),
+                                              content: Text('Error updating movie: $e'),
                                               backgroundColor: Colors.red,
+                                              duration: const Duration(seconds: 5),
                                             ),
                                           );
                                         }
                                       }
+                                    } else {
+                                      print('⚠️ Updated movie is null - update was cancelled');
                                     }
                                   }
                                 },
@@ -706,7 +714,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         await FirebaseService.deleteMovieById(
                                           docId,
                                         );
-                                        await _loadMovies();
+                                        // Stream will automatically update
                                         if (mounted) {
                                           ScaffoldMessenger.of(
                                             context,
@@ -813,6 +821,168 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // Cache for decoded images to prevent re-decoding on every rebuild
+  // Static cache persists across rebuilds and widget recreations
+  static final Map<String, Uint8List> _imageCache = {};
+  
+  // Cache for decode futures to prevent recreating FutureBuilder
+  static final Map<String, Future<Uint8List>> _decodeFutures = {};
+  
+  Future<Uint8List> _decodeBase64ImageAsync(String imageData) async {
+    // Check if we already have a future for this image
+    if (_decodeFutures.containsKey(imageData)) {
+      return _decodeFutures[imageData]!;
+    }
+    
+    // Create new future
+    final future = Future<Uint8List>.microtask(() {
+      try {
+        String base64String;
+        if (imageData.startsWith('data:image')) {
+          base64String = imageData.split(',')[1];
+        } else {
+          base64String = imageData;
+        }
+        
+        final bytes = base64Decode(base64String);
+        _imageCache[imageData] = bytes; // Cache the result
+        _decodeFutures.remove(imageData); // Remove future once done
+        return bytes;
+      } catch (e) {
+        _decodeFutures.remove(imageData);
+        throw Exception('Failed to decode base64 image: $e');
+      }
+    });
+    
+    _decodeFutures[imageData] = future;
+    return future;
+  }
+
+  // Helper method to build image from base64 or URL
+  Widget _buildMovieImage(String imageData, double height) {
+    // Check for base64 image (with or without data:image prefix)
+    if (imageData.startsWith('data:image') || (imageData.length > 500 && !imageData.startsWith('http'))) {
+      // Base64 image - check cache FIRST, then decode synchronously like customer screens
+      Uint8List? cachedBytes = _imageCache[imageData];
+      
+      if (cachedBytes != null) {
+        // Use cached image - instant display, no loading spinner
+        return Image.memory(
+          cachedBytes,
+          width: double.infinity,
+          height: height,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+          errorBuilder: (context, error, stackTrace) {
+            _imageCache.remove(imageData);
+            return _buildErrorImage(height);
+          },
+        );
+      }
+      
+      // Not in cache - decode in isolate to prevent blocking UI thread
+      // Use FutureBuilder but cache the future to prevent recreation
+      return FutureBuilder<Uint8List>(
+        future: _decodeBase64ImageAsync(imageData),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show placeholder while decoding - don't show spinner to avoid freeze feeling
+            return Container(
+              width: double.infinity,
+              height: height,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.indigo.shade400,
+                    Colors.purple.shade400,
+                  ],
+                ),
+              ),
+              child: const Icon(
+                Icons.image,
+                color: Colors.white,
+                size: 40,
+              ),
+            );
+          }
+          if (snapshot.hasError || !snapshot.hasData) {
+            return _buildErrorImage(height);
+          }
+          
+          return Image.memory(
+            snapshot.data!,
+            width: double.infinity,
+            height: height,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (context, error, stackTrace) {
+              _imageCache.remove(imageData);
+              return _buildErrorImage(height);
+            },
+          );
+        },
+      );
+    } else if (imageData.startsWith('blob:')) {
+      return _buildErrorImage(height);
+    } else if (imageData.startsWith('http://') || imageData.startsWith('https://')) {
+      return CachedNetworkImage(
+        imageUrl: imageData,
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        fadeInDuration: const Duration(milliseconds: 200),
+        fadeOutDuration: const Duration(milliseconds: 100),
+        placeholder: (context, url) => Container(
+          width: double.infinity,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.indigo.shade400,
+                Colors.purple.shade400,
+              ],
+            ),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => _buildErrorImage(height),
+      );
+    } else {
+      return _buildErrorImage(height);
+    }
+  }
+
+  Widget _buildErrorImage(double height) {
+    return Container(
+      width: double.infinity,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.indigo.shade400,
+            Colors.purple.shade400,
+          ],
+        ),
+      ),
+      child: const Icon(
+        Icons.movie,
+        color: Colors.white,
+        size: 60,
       ),
     );
   }

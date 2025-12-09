@@ -392,6 +392,7 @@
 //   }
 // }
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/user.dart';
@@ -411,34 +412,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
-  List<Movie> _movies = [];
-  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchMovies();
-  }
-
-  Future<void> _fetchMovies() async {
-    setState(() {
-      _loading = true;
-    });
-    final movies = await AppState.getMovies();
-    print('Fetched ${movies.length} movies'); // Debug
-    setState(() {
-      _movies = movies;
-      _loading = false;
-    });
-  }
-
-  List<Movie> get _filteredMovies {
-    if (_searchQuery.isEmpty) return _movies;
-    return _movies
-        .where(
-          (m) => m.title.toLowerCase().contains(_searchQuery.toLowerCase()),
-        )
-        .toList();
   }
 
   void _logout() {
@@ -513,7 +490,10 @@ class _HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: const Icon(Icons.refresh),
               color: Colors.white,
-              onPressed: _fetchMovies,
+              onPressed: () {
+                // Stream automatically updates
+                setState(() {});
+              },
               tooltip: 'Refresh',
             ),
             IconButton(
@@ -559,10 +539,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Movies List
+          // Movies List with StreamBuilder
           Expanded(
-            child: _loading
-                ? Center(
+            child: StreamBuilder<List<Movie>>(
+              stream: AppState.getMoviesStream(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -578,9 +561,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                  )
-                : _filteredMovies.isEmpty
-                ? Center(
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const SizedBox(height: 16),
+                        Text('Error: ${snapshot.error}'),
+                      ],
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(40.0),
                       child: Column(
@@ -593,18 +591,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              _searchQuery.isEmpty
-                                  ? Icons.movie_outlined
-                                  : Icons.search_off,
+                              Icons.movie_outlined,
                               size: 64,
                               color: Colors.purple.shade300,
                             ),
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            _searchQuery.isEmpty
-                                ? 'No movies available'
-                                : 'No movies found',
+                            'No movies available',
                             style: TextStyle(
                               fontSize: 22,
                               color: Colors.grey.shade800,
@@ -613,53 +607,78 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            _searchQuery.isEmpty
-                                ? 'Check back later for new releases'
-                                : 'Try a different search term',
+                            'Check back later for new releases',
                             style: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 14,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          if (_searchQuery.isEmpty) ...[
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: _fetchMovies,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Refresh'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple.shade600,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: () async {
-                      await _fetchMovies();
-                    },
-                    color: Colors.purple.shade600,
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      itemCount: _filteredMovies.length,
-                      itemBuilder: (context, index) {
-                        final movie = _filteredMovies[index];
-                        return _buildModernMovieCard(movie, index);
-                      },
+                  );
+                }
+
+                final movies = snapshot.data!;
+                final filteredMovies = _searchQuery.isEmpty
+                    ? movies
+                    : movies.where((m) =>
+                        m.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+
+                if (filteredMovies.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.purple.shade300,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'No movies found',
+                            style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.grey.shade800,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try a different search term',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    // Stream automatically updates
+                    setState(() {});
+                  },
+                  color: Colors.purple.shade600,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    itemCount: filteredMovies.length,
+                    itemBuilder: (context, index) {
+                      final movie = filteredMovies[index];
+                      return _buildModernMovieCard(movie, index);
+                    },
                   ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -702,51 +721,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   topRight: Radius.circular(24),
                 ),
                 child: movie.posterUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: movie.posterUrl,
-                        width: double.infinity,
-                        height: 240,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          width: double.infinity,
-                          height: 240,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.indigo.shade300,
-                                Colors.purple.shade300,
-                              ],
-                            ),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          width: double.infinity,
-                          height: 240,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                Colors.indigo.shade300,
-                                Colors.purple.shade300,
-                              ],
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.movie,
-                            color: Colors.white70,
-                            size: 60,
-                          ),
-                        ),
-                      )
+                    ? _buildMovieImage(movie.posterUrl, 240)
                     : Container(
                         width: double.infinity,
                         height: 240,
@@ -826,6 +801,85 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build image from base64 or URL
+  Widget _buildMovieImage(String imageData, double height) {
+    if (imageData.startsWith('data:image')) {
+      // Base64 image
+      try {
+        final base64String = imageData.split(',')[1];
+        final bytes = base64Decode(base64String);
+        return Image.memory(
+          bytes,
+          width: double.infinity,
+          height: height,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorImage(height);
+          },
+        );
+      } catch (e) {
+        print('❌ Error decoding base64 image: $e');
+        return _buildErrorImage(height);
+      }
+    } else if (imageData.startsWith('http') && !imageData.startsWith('blob:')) {
+      // URL image (for backward compatibility) - but not blob URLs
+      return CachedNetworkImage(
+        imageUrl: imageData,
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          width: double.infinity,
+          height: height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.indigo.shade300,
+                Colors.purple.shade300,
+              ],
+            ),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => _buildErrorImage(height),
+      );
+    } else {
+      // Fallback
+      return _buildErrorImage(height);
+    }
+  }
+
+  Widget _buildErrorImage(double height) {
+    return Container(
+      width: double.infinity,
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.indigo.shade300,
+            Colors.purple.shade300,
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.movie,
+          color: Colors.white,
+          size: 60,
         ),
       ),
     );

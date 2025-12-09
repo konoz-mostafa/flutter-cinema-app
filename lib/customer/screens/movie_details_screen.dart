@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/user.dart';
@@ -33,49 +34,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 fit: StackFit.expand,
                 children: [
                   widget.movie.posterUrl.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: widget.movie.posterUrl,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.purple.shade400,
-                                  Colors.indigo.shade400,
-                                  Colors.blue.shade400,
-                                ],
-                              ),
-                            ),
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Colors.purple.shade400,
-                                  Colors.indigo.shade400,
-                                  Colors.blue.shade400,
-                                ],
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.movie_rounded,
-                                size: 120,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        )
+                      ? _buildMovieImage(widget.movie.posterUrl)
                       : Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -336,6 +295,79 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Helper method to build image from base64 or URL
+  Widget _buildMovieImage(String imageData) {
+    if (imageData.startsWith('data:image')) {
+      // Base64 image
+      try {
+        final base64String = imageData.split(',')[1];
+        final bytes = base64Decode(base64String);
+        return Image.memory(
+          bytes,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return _buildErrorImage();
+          },
+        );
+      } catch (e) {
+        print('❌ Error decoding base64 image: $e');
+        return _buildErrorImage();
+      }
+    } else if (imageData.startsWith('http') && !imageData.startsWith('blob:')) {
+      // URL image (for backward compatibility) - but not blob URLs
+      return CachedNetworkImage(
+        imageUrl: imageData,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.purple.shade400,
+                Colors.indigo.shade400,
+                Colors.blue.shade400,
+              ],
+            ),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => _buildErrorImage(),
+      );
+    } else {
+      // Fallback
+      return _buildErrorImage();
+    }
+  }
+
+  Widget _buildErrorImage() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.purple.shade400,
+            Colors.indigo.shade400,
+            Colors.blue.shade400,
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.movie_rounded,
+          size: 120,
+          color: Colors.white,
+        ),
       ),
     );
   }

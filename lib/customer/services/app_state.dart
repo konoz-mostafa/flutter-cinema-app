@@ -129,6 +129,31 @@ class AppState {
     }
   }
 
+  // Get all movies as a real-time stream
+  static Stream<List<Movie>> getMoviesStream() {
+    return _db.collection('movies').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        
+        int movieId;
+        if (data['id'] != null) {
+          movieId = data['id'] is int ? data['id'] : int.tryParse(data['id'].toString()) ?? 0;
+        } else {
+          movieId = int.tryParse(doc.id) ?? 0;
+        }
+        
+        return Movie(
+          id: movieId,
+          title: data['title'] ?? '',
+          description: data['description'] ?? '',
+          posterUrl: data['posterUrl'] ?? '',
+          timeSlots: List<String>.from(data['timeSlots'] ?? []),
+          totalSeats: data['totalSeats'] ?? 47,
+        );
+      }).toList();
+    });
+  }
+
   // ===== Bookings =====
   
   // Get bookings for a specific movie and time slot

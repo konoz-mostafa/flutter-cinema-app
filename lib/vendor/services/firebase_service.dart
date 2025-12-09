@@ -147,9 +147,42 @@ class FirebaseService {
     }
   }
 
+  // Get all movies as a real-time stream
+  static Stream<Map<String, Movie>> getMoviesWithIdsStream() {
+    return _db.collection('movies').snapshots().map((snapshot) {
+      final Map<String, Movie> moviesMap = {};
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        
+        String movieId = '';
+        if (data['id'] != null) {
+          movieId = data['id'].toString();
+        } else {
+          movieId = doc.id;
+        }
+
+        moviesMap[doc.id] = Movie(
+          id: movieId,
+          title: data['title'] ?? '',
+          description: data['description'] ?? '',
+          imagePath: data['posterUrl'] ?? data['imagePath'] ?? '',
+          timeSlots: List<String>.from(data['timeSlots'] ?? []),
+          totalSeats: data['totalSeats'] ?? 47,
+        );
+      }
+      return moviesMap;
+    });
+  }
+
   // Update movie by document ID
   static Future<void> updateMovieById(String docId, Movie movie) async {
     try {
+      print('📝 Updating movie in Firestore...');
+      print('📝 Doc ID: $docId');
+      print('📝 Movie title: ${movie.title}');
+      print('📝 Time slots: ${movie.timeSlots}');
+      print('📝 Image path length: ${movie.imagePath.length}');
+      
       await _db.collection('movies').doc(docId).update({
         'title': movie.title,
         'description': movie.description,
@@ -158,9 +191,12 @@ class FirebaseService {
         'totalSeats': movie.totalSeats,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      print('Movie updated in Firebase: ${movie.title}');
-    } catch (e) {
-      print('Error updating movie in Firebase: $e');
+      
+      print('✅ Movie updated successfully in Firebase: ${movie.title}');
+      print('✅ Document ID: $docId');
+    } catch (e, stackTrace) {
+      print('❌ Error updating movie in Firebase: $e');
+      print('❌ Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -258,13 +294,13 @@ class FirebaseService {
   /// جلب حجوزات المستخدم
   static Future<List<Booking>> getUserBookings(String userEmail) async {
     try {
+      // Remove orderBy to avoid index requirement, sort in memory instead
       final querySnapshot = await _db
           .collection('bookings')
           .where('userEmail', isEqualTo: userEmail)
-          .orderBy('dateTime', descending: true)
           .get();
 
-      return querySnapshot.docs.map((doc) {
+      final bookings = querySnapshot.docs.map((doc) {
         final data = doc.data();
         return Booking(
           id: doc.id,
@@ -276,6 +312,11 @@ class FirebaseService {
           timeSlot: data['timeSlot'] ?? '',
         );
       }).toList();
+
+      // Sort in memory by dateTime descending (newest first)
+      bookings.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+      
+      return bookings;
     } catch (e) {
       print('Error fetching user bookings: $e');
       return [];
