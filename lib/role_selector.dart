@@ -32,7 +32,7 @@ class RoleSelector extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const CustomerApp()),
+                    MaterialPageRoute(builder: (_) => const CinemaBookingApp()),
                   );
                 },
               ),
